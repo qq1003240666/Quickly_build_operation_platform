@@ -1,0 +1,117 @@
+# 全局配置
+global:
+  # 收集指标频率
+  scrape_interval: 1m
+  # 收集指标超时时间
+  scrape_timeout: 10s
+  # 评估规则频率
+  evaluation_interval: 1m
+
+# 规则配置
+rule_files:
+  - "rules/*.rules"
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+#
+# 抓取配置
+scrape_configs:
+  # 示例
+  # - job_name: "test" # 抓取名称
+  #   scrape_interval: 1m # 单独设置指标收集频率
+  #   scrape_timeout: 10s # 单独设置指标收集超时时间
+  #   metrics_path: /metrics # 设置默认指标http 路径
+  #   honor_labels: false # honor_labels 设置如果是false  如果出现prometheus设置标签和采集器标签冲突则将采集器端标签前面加expoted_  如果为true 则保留采集端的标签
+  #   scheme: http # 配置请求协议方案
+  #   tls_config: 配置http tls
+  #     - xxx
+  #   basic_auth: # 用户认证
+  #     - username: xxx
+  #       password: xxx
+  #   proxy_url: xxx # 配置请求使用代理
+  #   file_sd_configs: # 文件服务发现配置列表
+  #     - *.json
+  #   static_configs:
+  #     - targets: [""]
+  #       labels:
+  #         xxx: xxx
+
+  - job_name: 'file'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    honor_timestamps: false
+    file_sd_configs:
+      - files:
+        - /etc/prometheus/*.json
+
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus"
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: ["localhost:9090"]
+        labels:
+          app: 'promethues'
+
+  - job_name: "pushgateway"
+    honor_labels: true
+    scrape_interval: 5s
+    static_configs: 
+      - targets: ["192.168.2.70:9093"]
+
+  - job_name: "node-export"
+    static_configs:
+      - targets: ["192.168.2.70:9100"]
+        labels: 
+          instance: 'localhost'
+
+  - job_name: "nginx-export"
+    static_configs:
+      - targets: ["192.168.2.79:9114"]
+        labels: 
+          instance: 'locathost'
+          app: 'nginx'
+        
+  - job_name: "mysql-export"
+    static_configs: 
+      - targets: ["192.168.2.70:9104"]
+        labels: 
+          instance: 'localhost'
+          app: 'mysql'
+
+  - job_name: "redis-export"
+    static_configs:
+      - targets: ["192.168.2.70:9121"]
+        labels:
+          instance: 'localhost'
+          app: 'redis'
+
+  - job_name: "postgres-export"
+    static_configs:
+      - targets: ["192.168.2.70:9187"]
+        labels:
+          instance: 'localhost'
+          app: 'postgres'
+
+  - job_name: "mongodb-export"
+    static_configs:
+      - targets: ["192.168.2.70:9216"]
+        labels:
+          instance: 'localhost'
+          app: 'mongodb'
+
+  - job_name: "kafka-export"
+    static_configs:
+      - targets: ["192.168.2.70:9308"]
+        labels:
+          instance: 'localhost'
+          app: 'kafka'
+
+  - job_name: "cadvisor"
+    static_configs:
+      - targets: ["192.168.2.70:6001"]
+        labels:
+          instance: 'localhost' 
+          app: 'docker'

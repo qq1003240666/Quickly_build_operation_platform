@@ -1,0 +1,23 @@
+version: '3'
+services:
+  nginx:
+    container_name: nginx
+    image: nginx:1.22
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - ./conf.d/:/etc/nginx/conf.d/
+      - ./www/:/var/www/
+      - ./log/:/var/log/nginx/
+
+  nginx_prometheus_export:
+    container_name: nginx_prometheus_export
+    image: nginx/nginx-prometheus-exporter
+    command:
+      - '--nginx.scrape-uri=http://nginx/status'
+    ports:
+      - 9113:9113
+    links:
+      - nginx
+

@@ -1,0 +1,24 @@
+version: "3"
+services:
+  mongodb:
+    container_name: mongodb
+    image: mongo
+    restart: always
+    volumes:
+      - ./mongodb_data/:/data/db/
+      - ./tmp/:/tmp/
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 123456
+  mongodb_exporter:
+    container_name: mongodb_exporter
+    image: bitnami/mongodb-exporter
+    restart: always
+    ports:
+      - 9216:9216
+    environment:
+      MONGODB_URI: mongodb://root:123456@mongodb:27017/:?authSource=admin
+    links:
+      - mongodb

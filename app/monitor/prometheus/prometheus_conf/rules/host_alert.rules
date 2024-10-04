@@ -1,0 +1,148 @@
+groups:
+- name: host_alert
+  rules:
+# CPU使用率 -------------------------------------------
+  - alert: 主机CPU使用率大于80%
+    expr: (1 - avg (irate(node_cpu_seconds_total{mode="idle"}[5m])) by(instance))*100 > 80
+    for: 5m
+    labels:
+      level: 2
+    annotations:
+      summary: "实例 {{ $labels.instance }} CPU使用率过高大于80%"
+      description: "实例 {{ $labels.instance }} CPU使用率过高,当前值为{{ $value }}%"
+
+  - alert: 主机CPU使用率大于90%
+    expr: (1 - avg (irate(node_cpu_seconds_total{mode="idle"}[5m])) by(instance))*100 > 90
+    for: 1m
+    labels:
+      level: 3
+    annotations:
+      summary: "[严重警告] 实例 {{ $labels.instance }} CPU使用率过高大于90%"
+      description: "实例 {{ $labels.instance }} CPU使用率过高,当前值为{{ $value }}%"
+
+# 机器负载---------------------------------------------
+  - alert: 主机负载过高
+    expr: sum by(instance)(node_load15) / count by(instance)(node_cpu_seconds_total{mode="system"}) > 0.7
+    for: 5m
+    labels:
+      level: 2
+    annotations:
+      summary: "实例 {{ $labels.instance }} 机器负载过高"
+      description: "实例 {{ $labels.instance }} 机器负载过高,当前值为{{ $value }}"
+
+  - alert: 主机负载过高
+    expr: sum by(instance)(node_load15) / count by(instance)(node_cpu_seconds_total{mode="system"})  > 1
+    for: 1m
+    labels:
+      level: 3
+    annotations:
+      summary: "[严重警告] 实例 {{ $labels.instance }} 机器负载过高"
+      description: "实例 {{ $labels.instance }} 机器负载过高,当前值为{{ $value }}"
+
+# 内存使用率---------------------------------------------
+  - alert: 主机内存使用率大于80%
+    expr: 100 - (node_memory_MemFree_bytes+node_memory_Cached_bytes+node_memory_Buffers_bytes) / node_memory_MemTotal_bytes * 100 > 80
+    for: 5m
+    labels:
+      level: 2
+    annotations:
+      summary: "实例 {{ $labels.instance }} 内存使用率过高大于80%"
+      description: "实例 {{ $labels.instance }} 内存使用率过高,当前值为{{ $value }}%"
+
+  - alert: 主机内存使用率大于90%
+    expr: 100 - (node_memory_MemFree_bytes+node_memory_Cached_bytes+node_memory_Buffers_bytes) / node_memory_MemTotal_bytes * 100 > 80
+    for: 1m
+    labels:
+      level: 3
+    annotations:
+      summary: "[严重警告]实例 {{ $labels.instance }} 内存使用率过高大于90%"
+      description: "实例 {{ $labels.instance }} 内存使用率过高,当前值为{{ $value }}%"
+
+# 磁盘使用率
+  - alert: 主机磁盘使用率大于70%
+    expr: (node_filesystem_size_bytes{fstype=~"ext.*|xfs"}-node_filesystem_free_bytes{fstype=~"ext.*|xfs"}) /(node_filesystem_avail_bytes {fstype=~"ext.*|xfs"}+(node_filesystem_size_bytes{fstype=~"ext.*|xfs"}-node_filesystem_free_bytes{fstype=~"ext.*|xfs"})) * 100 > 70
+    for: 1m
+    labels:
+      level: 1
+    annotations:
+      summary: "实例 {{ $labels.instance }} 磁盘使用率过高大于70%"
+      description: "实例 {{ $labels.instance }} 磁盘使用率过高,分区{{ $labels.mountpoint }},当前值为{{ $value }}%"
+
+  - alert: 主机磁盘使用率大于80%
+    expr: (node_filesystem_size_bytes{fstype=~"ext.*|xfs"}-node_filesystem_free_bytes{fstype=~"ext.*|xfs"}) /(node_filesystem_avail_bytes {fstype=~"ext.*|xfs"}+(node_filesystem_size_bytes{fstype=~"ext.*|xfs"}-node_filesystem_free_bytes{fstype=~"ext.*|xfs"})) * 100 > 70
+    for: 1m
+    labels:
+      level: 2
+    annotations:
+      summary: "实例 {{ $labels.instance }} 磁盘使用率过高大于80%"
+      description: "实例 {{ $labels.instance }} 磁盘使用率过高,分区{{ $labels.mountpoint }},当前值为{{ $value }}%"
+
+  - alert: 主机磁盘使用率大于90%
+    expr: (node_filesystem_size_bytes{fstype=~"ext.*|xfs"}-node_filesystem_free_bytes{fstype=~"ext.*|xfs"}) /(node_filesystem_avail_bytes {fstype=~"ext.*|xfs"}+(node_filesystem_size_bytes{fstype=~"ext.*|xfs"}-node_filesystem_free_bytes{fstype=~"ext.*|xfs"})) * 100 > 70
+    for: 1m
+    labels:
+      level: 3
+    annotations:
+      summary: "实例 {{ $labels.instance }} 磁盘使用率过高大于90%"
+      description: "实例 {{ $labels.instance }} 磁盘使用率过高,分区{{ $labels.mountpoint }},当前值为{{ $value }}%"
+
+# 磁盘使用增长率
+
+# 磁盘读写io
+  - alert: 主机磁盘读IO过高大于50MB/s
+    expr: rate(node_disk_read_bytes_total[5m]) / 1024 / 1024 > 50
+    for: 1m
+    labels:
+      level: 2
+    annotations:
+      summary: "实例 {{ $labels.instance }} 磁盘读IO过高 大于50MB/s"
+      description: "实例 {{ $labels.instance }} 磁盘读IO过高,当前值为{{ $value }}%"
+
+  - alert: 主机磁盘写IO过高大于50MB/s
+    expr: rate(node_disk_written_bytes_total[5m]) / 1024 / 1024 > 50
+    for: 1m
+    labels:
+      level: 2
+    annotations:
+      summary: "实例 {{ $labels.instance }} 磁盘读IO过高 大于50MB/s"
+      description: "实例 {{ $labels.instance }} 磁盘写IO过高,当前值为{{ $value }}%"
+
+# 网络带宽
+  - alert: 主机入网流量大于50MB/s
+    expr: rate(node_network_transmit_bytes_total[5m]) / 1024 / 1024 > 50
+    for: 1m
+    labels:
+      level: 2
+    annotations:
+      summary: "实例 {{ $labels.instance }} 入网流量大于50MB/s"
+      description: "实例 {{ $labels.instance }} 入网流量过高,网卡{{ $labels.device }},当前值为{{ $value }}%"
+
+  - alert: 主机出网流量大于50MB/s
+    expr: rate(node_network_receive_bytes_total[5m]) / 1024 / 1024 > 50
+    for: 1m
+    labels:
+      level: 2
+    annotations:
+      summary: "实例 {{ $labels.instance }} 出网流量大于50MB/s"
+      description: "实例 {{ $labels.instance }} 出网流量过高,网卡{{ $labels.device }},当前值为{{ $value }}%"
+
+# 建立TCP连接数
+  - alert: 当前建立TCP连接数过多超过100
+    expr: node_netstat_Tcp_CurrEstab > 100
+    for: 1m
+    labels:
+      level: 2
+    annotations:
+      summary: "实例 {{ $labels.instance }} 当前建立TCP连接数过多超过100"
+      description: "实例 {{ $labels.instance }} 当前建立TCP连接数过多,当前值为{{ $value }}%"
+
+
+# 机器重启告警
+  - alert: 机器重启告警
+    expr: sum by (instance)(time() - node_boot_time_seconds) /60 < 5
+    for: 1m
+    labels:
+      level: 3
+    annotations:
+      summary: "实例 {{ $labels.instance }} 5分钟前启动"
+      description: "实例 {{ $labels.instance }} 5分钟前启动"

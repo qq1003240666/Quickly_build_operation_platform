@@ -1,0 +1,19 @@
+apisix:
+    node_listen:
+        - port: 9080
+deployment:
+    role: traditional
+    role_traditional:
+        config_provider: etcd
+    etcd:
+       host:
+           - http://apisix-etcd:2379
+    admin:
+        admin_listen:
+            port: 9180
+        allow_admin:
+            - 0.0.0.0/0
+        admin_key:
+            - name: "admin"
+              key: b848941cd4e1003f2f961a7786ecf75f
+              role: admin

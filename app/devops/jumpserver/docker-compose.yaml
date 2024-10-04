@@ -1,0 +1,28 @@
+version: '3'
+services:
+  jumpserver:
+    container_name: jumpserver
+    image: jumpserver/jms_all
+    restart: always
+    environment:
+      SECRET_KEY: kWQdmdCQKjaWlHYpPhkNQDkfaRulM6YnHctsHLlSas8287o2kW
+      BOOTSTRAP_TOKEN: KXOeyNgDeTdpeu2q
+      LOG_LEVEL: ERROR
+      DB_HOST: 192.168.2.99
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: 123456
+      DB_NAME: jumpserver
+      REDIS_HOST: 192.168.2.99
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: 123456
+    volumes:
+      - ./jumpserver_data/core_data/:/opt/jumpserver/data
+      - ./jumpserver_data/koko_data/:/opt/koko/data/
+      - ./jumpserver_data/lion_data/:/opt/lion/data/
+      - ./jumpserver_data/chen_data/:/opt/chen/data/
+      - ./jumpserver_logs:/opt/jumpserver/logs
+    ports:
+      - 2222:2222
+      - 10443:443
+      - 4080:80

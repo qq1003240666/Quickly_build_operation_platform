@@ -1,0 +1,76 @@
+# 全局配置
+global:
+  # 超时时间
+  resolve_timeout: 5m
+  # smtp地址 
+  smtp_smarthost: 'smtp.163.com:25'
+  # 发件人邮箱 账号 密码
+  smtp_from: 'xxx@163.com'
+  smtp_auth_username: ''
+  smtp_auth_password: ''
+  smtp_require_tls: false
+
+
+# 路由
+route:
+  # 分组方式 一起告警的标签
+  group_by: ['instance','cluster','service']
+  # 同一组告警 等待 多少时间 统一发送
+  group_wait: 30s
+  # 相同告警间隔多少秒之后才能再次发送
+  group_interval: 5m
+  # 重复的告警需要等多久能再次发送
+  repeat_interval: 1h
+  # 告警方式
+  receiver: 'web.hook'
+
+  # 如果其他情况 告警方式
+  routes:
+  - match_re:
+      # 有 严重 标签的
+      serverity: critical
+    receiver: 'web.hook'
+
+# webhook 告警方式
+receivers:
+  - name: 'web.hook'
+    webhook_configs:
+      # 这里需要搭建一个 第三方 prometheus-webhook-dingtal 插件 l
+      - url: 'http://127.0.0.1:5001/'
+
+  - name: 'mail'
+    email_configs:
+    - to: 'xxx@qq.com'
+      from: 'xxx@163.com'
+      hello: ''
+      headers:
+        From: 'xxx@163.com'
+        Subject: '{{ template "email.default.subject" . }}' 
+      text: '{{ template "email.default.html" . }}'
+
+templates:
+- /etc/alertmanager/templates/*.tmpl
+
+# 沉默告警时间
+mute_time_intervals:
+- name: night
+  time_intervals:
+    # 每天开启的时间段
+  - times:
+    - start_time: "18:00"
+      end_time: "23:59"
+    - start_time: "00:00"
+      end_time: "09:00"
+    # 每周开启的时间段
+    weekdays: ['monday:friday']
+    # 一个月开启的时段
+    days_of_month: ['1:20','-3:-1']
+
+
+# 抑制规则  当出现 严重告警时一只 警告
+inhibit_rules:
+  - source_match:
+      serverity: 'critical'
+    target_match:
+      serverity: 'warning'
+

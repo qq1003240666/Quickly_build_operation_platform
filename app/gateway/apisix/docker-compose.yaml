@@ -1,0 +1,36 @@
+version: "3"
+services:
+  apisix:
+    container_name: apisix
+    image: apache/apisix:3.2.2-debian
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./conf/config.yaml:/usr/local/apisix/conf/config.yaml:rw
+    ports:
+      - "9080:9080"
+      - "9180:9180"
+    links:
+      - apisix-etcd
+
+  apisix-etcd:
+    container_name: apisix-etcd
+    image: quay.io/coreos/etcd:v3.5.5
+    restart: always
+    command:
+      /usr/local/bin/etcd --name etcd0 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380
+    volumes:
+      - ./etcd-data:/etcd-data
+
+  apisix-dashboard:
+    container_name: apisix-bashboard
+    image: apache/apisix-dashboard:3.0.0-alpine
+    restart: always
+    volumes:
+    - ./conf/dashboard.yaml:/usr/local/apisix-dashboard/conf/conf.yaml
+    ports:
+    - "9000:9000"
+    - "9001:9001"
+    links:
+      - apisix-etcd
