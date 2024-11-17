@@ -1,0 +1,9 @@
+version: '3'
+services:
+  yacd:
+    container_name: clash_yacd
+    image: ghcr.io/haishanh/yacd:master
+    restart: always
+    ports:
+      - 1234:80
+

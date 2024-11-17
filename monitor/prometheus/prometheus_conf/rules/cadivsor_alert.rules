@@ -1,0 +1,23 @@
+groups:
+- name: docker_alert
+  rules:
+  # 容器CPU使用率
+  - alert: 容器cpu使用率过高大于80%
+    expr: sum by(name) (rate(container_cpu_usage_seconds_total{name!=""}[5m])) * 100 > 80
+    for: 1m
+    labels:
+      level: 2
+    annotations:
+      summary: "实例 {{ $labels.instance }} 上的容器 {{ $labels.name }} cpu使用率过高大于80%"
+      description: "实例 {{ $labels.instance }} 上的容器 {{ $labels.name }} cpu使用率过高,当前值为{{ $value }}%"
+
+  # 容器内存内存使用率过高
+  - alert: 容器内存使用率过高大于80%
+    expr: container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes * 100 > 80
+    for: 1m
+    labels:
+      level: 2
+    annotations:
+      summary: "实例 {{ $labels.instance }} 上的容器 {{ $labels.name }} 内存使用率过高大于80%"
+      description: "实例 {{ $labels.instance }} 上的容器 {{ $labels.name }} 内存使用率过高,当前值为{{ $value }}%"
+

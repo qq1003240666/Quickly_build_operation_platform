@@ -1,0 +1,45 @@
+version: '3.1'
+services:
+  jumpserver:
+    container_name: jumpserver
+    image: jumpserver/jms_all:v2.16.0
+    restart: always
+    environment:
+      #SECRET_KEY: 15hMccXFn40TCKJETDnjlUhkZEXIAcq3E3aQ6T6LDmfLUN0oAV
+      #BOOTSTRAP_TOKEN: HT8qH0wSuyQjcNyh
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: jumpserver
+      DB_PASSWORD: 1234567abc
+      DB_NAME: jumpserver
+      REDIS_HOST: redis
+      REDIS_PASSWORD: 123456aaaaa
+    volumes:
+      - ./jumpserver_data/:/opt/jumpserver/data
+    ports:
+      - 2222:2222
+      - 4080:80
+    links:
+      - mysql
+      - redis
+
+  mysql:
+    container_name: jumpserver-mysql
+    image: mysql:8.0
+    restart: always
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234567abc
+    ports:
+      - 3307:3306
+
+  redis:
+    container_name: jumpserver-redis
+    image: redis:7.0.8
+    restart: always
+    volumes:
+      - ./redis_data:/data
+      - ./redis_conf:/usr/local/etc/redis/
+    command:
+      redis-server /usr/local/etc/redis/redis.conf

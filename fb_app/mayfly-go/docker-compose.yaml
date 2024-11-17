@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: "mysql:8"
+    container_name: mayfly-go-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 111049
+      MYSQL_DATABASE: mayfly-go
+      TZ: Asia/Shangha
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./mysql_data/datadir:/var/lib/mysql
+    restart: always
+
+  server:
+    image: ccr.ccs.tencentyun.com/mayfly/mayfly-go:v1.8.5
+    container_name: mayfly-go-server
+    ports:
+      - "18888:18888"
+    environment:
+      TZ: Asia/Shanghai
+      WAIT_HOSTS: mysql:3306
+    volumes:
+      - ./mayfly/config.yml:/mayfly/config.yml
+      - ./mayfly/mayfly-go.log:/mayfly/mayfly-go.log
+      - ./mayfly/rec:/mayfly/rec
+      - ./mayfly/:/mayfly/
+    depends_on:
+      - mysql
+    restart: always
